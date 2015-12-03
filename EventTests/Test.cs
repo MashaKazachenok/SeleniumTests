@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Model;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Interactions;
@@ -12,80 +14,73 @@ namespace EventTests
     {
         private const string BaseUrl = "http://hampton-demo.accelidemo.com/";
 
-        private readonly FirefoxDriver _driver = new FirefoxDriver();
+        private FirefoxDriver _driver;
+        private LoginPage _loginPage;
+        private CreateEventElements _createEventElements;
+
 
         [TestInitialize]
-        public void Start()
+        public void SetUp()
         {
+            _driver = new FirefoxDriver();
+            _loginPage = new LoginPage(_driver);
+            _createEventElements = new CreateEventElements(_driver);
+
             _driver.Navigate().GoToUrl(BaseUrl + "/Login.aspx");
-
-            _driver.FindElement(By.Id("plcContent_LoginControl_UserName")).SendKeys("superlion");
-            _driver.FindElement(By.Id("plcContent_LoginControl_Password")).SendKeys("CTAKAH");
-            _driver.FindElement(By.Id("plcContent_LoginControl_lnkLogin")).Click();
-
+       
+            _loginPage.UserName.SendKeys("superlion");
+            _loginPage.Password.SendKeys("CTAKAH");
+            _loginPage.SubmitButton.Click();
         }
 
         [TestMethod]
         public void LockEvent504ReverraL()
         {
             AddTimeOut(2000);
-            var homeElement = _driver.FindElementByLinkText("Home");
+            var homeElement = _createEventElements.HomeElement;
             AddTimeOut(500);
 
             Actions actions = new Actions(_driver);
             actions.MoveToElement(homeElement).Build().Perform();
 
-            var spedElement = _driver.FindElement(By.CssSelector("a[href='../IEP/']"));
-            spedElement.Click();
+            _createEventElements.SpedElement.Click();
 
             AddTimeOut(7000);
-            var studentsTab = _driver.FindElement(By.CssSelector("a[href='/IEP/Students']"));
+            _createEventElements.StudentsTab.Click();
 
-            AddTimeOut(2000);
-            studentsTab.Click();
-
-            AddTimeOut(6000);
             GetStudent();
 
             GetEvent();
+
             AddTimeOut(6000);
-            var eventsCount = _driver.FindElementsByLinkText("504 Referral").Count; 
-
+            var referral504EventsCount = _createEventElements.Reverral504Elements.Count;
+            AddTimeOut(3000);
             CreateEvent504Reverral();
-            AddTimeOut(5000);
-
-            var eventCountActual = _driver.FindElementsByLinkText("504 Referral").Count;
-            AddTimeOut(1500);
-            var eventCountExpected = eventsCount + 1;
-            var allEventCount = _driver.FindElements(By.ClassName("k-reset")).Count;
+           
+            var eventCountActual = _createEventElements.Reverral504Elements.Count;
+            var eventCountExpected = referral504EventsCount + 1;
+            var allEventCount = _createEventElements.AllEventsElements.Count;
+            AddTimeOut(11000);
 
             Assert.AreEqual(eventCountExpected, eventCountActual);
 
             AddTimeOut(3000);
-            var refferalEventLinks = _driver.FindElementsByLinkText("504 Referral");
-            AddTimeOut(2000);
-            refferalEventLinks[0].Click();
+           _createEventElements.Reverral504Elements[0].Click();
 
-            AddTimeOut(3000);
-            var formLink = _driver.FindElement(By.CssSelector("a[href='#Section504ReferralForm']"));
+            AddTimeOut(7000);
+           _createEventElements.FormLink.Click();
 
-            AddTimeOut(3000);
-            formLink.Click();
-            AddTimeOut(10000);
-
-            AddValueToField();
-            AddTimeOut(5000);
-
-            var lockButton = _driver.FindElement(By.Id("btnLockEvent"));
-            lockButton.Click();
+            AddValueToFields();
+         
+           _createEventElements.LockButton.Click();
             AddTimeOut(2000);
 
             _driver.SwitchTo().Alert().Accept();
             AddTimeOut(8000);
 
-            var event504ReverralAfterLock = _driver.FindElementsByLinkText("504 Referral").Count; 
-            var allEventCountActual = _driver.FindElements(By.ClassName("k-reset")).Count;
-            AddTimeOut(3000);
+            var event504ReverralAfterLock = _createEventElements.Reverral504Elements.Count;
+            var allEventCountActual = _createEventElements.AllEventsElements.Count;
+            AddTimeOut(11000);
 
             Assert.AreEqual(eventCountActual, event504ReverralAfterLock);
             Assert.AreEqual(allEventCount + 1, allEventCountActual);
@@ -101,81 +96,63 @@ namespace EventTests
         private void CreateEvent504Reverral()
         {
             AddTimeOut(2000);
+            _createEventElements.CreateEventButton.Click();
 
-            var createButtton = _driver.FindElement(By.Id("btnCreateEventGroup"));
-            AddTimeOut(2000);
-            createButtton.Click();
+            AddTimeOut(6000);
+            _createEventElements.SelectEventInputElement.Click();
 
-            AddTimeOut(3000);
-            var selectEvent = _driver.FindElementByClassName("k-input");
-            AddTimeOut(1000);
-            selectEvent.Click();
-            ((IJavaScriptExecutor) _driver).ExecuteScript(String.Format("$('#{0}').data('kendoDropDownList').select({1});",
-                "EventGroupDefinitionId", 3));
-            var referralEvent = _driver.FindElement(By.CssSelector("[data-offset-index='3']"));
-            AddTimeOut(500);
-            referralEvent.Click();
+            ((IJavaScriptExecutor)_driver).ExecuteScript(String.Format("$('#{0}').data('kendoDropDownList').select({1});", "EventGroupDefinitionId", 3));
+            _createEventElements.Referral504OptionSelect.Click();
 
-            var dateControl = _driver.FindElement(By.Id("ScheduleDate"));
-            AddTimeOut(1000);
-            dateControl.SendKeys("11/15/2015 12:00 AM");
-
-            var saveButtton = _driver.FindElement(By.Id("btnSaveEventGroup"));
-            AddTimeOut(2000);
-
-            saveButtton.Click();
+            _createEventElements.DateControl.SendKeys("11/15/2015 12:00 AM");
+            _createEventElements.SaveEventButton.Click();
+            AddTimeOut(5000);
         }
 
-        private void AddValueToField()
+        private void AddValueToFields()
         {
-            var fieldsInput = _driver.FindElementsByCssSelector("input[required='required']");
+            AddTimeOut(5000);
+            var fieldsInput = _createEventElements.FieldsInputRequired;
+            InputValueForFields(fieldsInput);
 
-            foreach (var field in fieldsInput)
+            var fieldsTestarea = _createEventElements.FieldsTextAreaRequired;
+            InputValueForFields(fieldsTestarea);
+
+            AddTimeOut(2000);
+            _createEventElements.UpdateFormButton.Click();
+            AddTimeOut(5000);
+        }
+
+        private static void InputValueForFields(IList<IWebElement> fields)
+        {
+            foreach (var field in fields)
             {
                 field.Clear();
                 field.SendKeys("1");
             }
-
-            var fieldsTestarea = _driver.FindElementsByCssSelector("textarea[required='required']");
-
-            foreach (var field in fieldsTestarea)
-            {
-                field.Clear();
-                field.SendKeys("1");
-            }
-
-            var updateButton = _driver.FindElement(By.Id("btnUpdateForm"));
-            updateButton.Click();
         }
 
         private void GetStudent()
         {
-            var links = _driver.FindElementsByTagName("a");
-            AddTimeOut(3000);
+           AddTimeOut(7000);
+           var links = _createEventElements.Links;
 
             for (int i = 0; i < links.Count; i++)
             {
-                var hrefAtr = links[i].GetAttribute("href");
+                var hrefAtr = links[i].GetAttribute("href").Contains("/IEP/Students/ViewStudent"); 
 
-                if (hrefAtr != null)
+                if (hrefAtr)
                 {
-                    var hrefStudents = hrefAtr.Contains("/IEP/Students/ViewStudent");
-
-                    if (hrefStudents)
-                    {
-                        AddTimeOut(3000);
                         links[i].Click();
                         break;
-                    }
                 }
             }
         }
 
         private void GetEvent()
         {
-            AddTimeOut(4000);
-            var eventsLink = _driver.FindElements(By.PartialLinkText("Events"));
-            AddTimeOut(5000);
+            AddTimeOut(10000);
+            var eventsLink = _createEventElements.EventLinks;
 
             for (int i = 0; i < eventsLink.Count; i++)
             {
@@ -183,7 +160,6 @@ namespace EventTests
 
                 if (hrefElementHampton504)
                 {
-                    AddTimeOut(3000);
                     eventsLink[i].Click();
                     break;
                 }
