@@ -82,5 +82,34 @@ namespace Model
 
         [FindsBy(How = How.LinkText, Using = EventLinksLinkText)]
         public IList<IWebElement> EventLinks { get; set; }
+
+        public IList<IWebElement> Event504ReverralLinksFromFirstTable
+        {
+            get
+            {
+                return
+                    _webDriver.FindElement(By.XPath("//div[@id='pnlEventList']")).FindElements(By.LinkText("504 Referral"));
+            }
+        }
+
+        public IList<IWebElement> Event504ReverralLinksLock
+        {
+            get
+            {
+                return
+                    _webDriver.FindElement(By.XPath("//div[@id='pnlEventLockedList']")).FindElements(By.LinkText("504 Referral"));
+            }
+        }
+
+          public IList<IWebElement> Event504EligibilityMeetingLinks
+        {
+            get
+            {
+                return
+                    _webDriver.FindElement(By.XPath("//div[@id='pnlEventList']")).FindElements(By.LinkText("504 Eligibility Meeting"));
+            }
+        }
+        
+
     }
 }
