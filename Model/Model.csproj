@@ -49,7 +49,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CreateEventElements.cs" />
+    <Compile Include="LocationElements.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LoginPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 namespace Model
 {
-    public class CreateEventElements
+    public class LocationElements
     {
-        private IWebDriver _webDriver;
+        private readonly IWebDriver _webDriver;
 
-        public CreateEventElements(IWebDriver webDriver)
+        public LocationElements(IWebDriver webDriver)
         {
             this._webDriver = webDriver;
             PageFactory.InitElements(webDriver, this);

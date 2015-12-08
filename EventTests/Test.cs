@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Model;
@@ -19,8 +18,10 @@ namespace EventTests
 
         private static readonly FirefoxDriver Driver = new FirefoxDriver();
         private readonly LoginPage _loginPage = new LoginPage(Driver);
-        private readonly CreateEventElements _createEventElements = new CreateEventElements(Driver);
+        private readonly LocationElements _locationElements = new LocationElements(Driver);
         private readonly WebDriverWait _wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
+        private static string _studentSummaryUrl;
+        private static string _createEventUrl;
 
         [TestInitialize]
         public void SetUp()
@@ -29,7 +30,6 @@ namespace EventTests
         }
 
         [TestMethod]
-        [Priority(1)]
         public void CreateLogin()
         {
             Driver.Navigate().GoToUrl(BaseUrl + "/Login.aspx");
@@ -45,85 +45,95 @@ namespace EventTests
             }
             catch (Exception e)
             {
-                Logger.Log.Info(String.Format("Login Failed {0}", e.Message)); 
+                Logger.Log.Info(String.Format("Login Failed {0}", e.Message));
                 Assert.Fail();
             }
         }
 
         [TestMethod]
-        [Priority(2)]
-        public void Event504ReverraLCreate()
+        public void DOpenStudent()
         {
-            var homeElement = _createEventElements.HomeElement;
+            var homeElement = _locationElements.HomeElement;
             Actions actions = new Actions(Driver);
             actions.MoveToElement(homeElement).Build().Perform();
-            _createEventElements.SpedElement.Click();
+            _locationElements.SpedElement.Click();
 
-
-            _wait.Until(ExpectedConditions.ElementIsVisible(By.Id("HamptonIEPchtStudentCompliance")));
+            WaitIsVisibleAndClickable(By.Id("HamptonIEPchtStudentCompliance"));
             AddTimeOut(1000);
 
-            _createEventElements.StudentsTab.Click();
+            _locationElements.StudentsTab.Click();
 
-
-            GetStudent(_wait);
-
-            GetEvent(_wait);
-
-            AddTimeOut(10000);
-            var referral504EventsCount = _createEventElements.Reverral504Elements.Count;
-
-            CreateEvent(_wait, 3);
-
-            AddTimeOut(5000);
-            var eventCountActual = _createEventElements.Reverral504Elements.Count;
-            var eventCountExpected = referral504EventsCount + 1;
-
-            Assert.AreEqual(eventCountExpected, eventCountActual);
-           
+            GetStudent();
+       
+            _studentSummaryUrl = Driver.Url;
         }
 
         [TestMethod]
-        [Priority(3)]
+        public void Event504ReverraLCreate()
+        {
+           // _wait.Until(ExpectedConditions.UrlToBe(_studentSummaryUrl));
+            Driver.Navigate().GoToUrl(_studentSummaryUrl);
+            GetEvent();
+
+            WaitIsVisibleAndClickable(By.Id("pnlEventLockedList"));
+            AddTimeOut(2000);
+            var referral504EventsCount = _locationElements.Reverral504Elements.Count;
+
+            CreateEvent(3);
+
+            AddTimeOut(5000);
+            var eventCountActual = _locationElements.Reverral504Elements.Count;
+            var eventCountExpected = referral504EventsCount + 1;
+            _createEventUrl = Driver.Url;
+            Assert.AreEqual(eventCountExpected, eventCountActual);
+
+        }
+
+        [TestMethod]
         public void LockEvent504ReverraL()
         {
-            Driver.Navigate().GoToUrl("http://hampton-demo.accelidemo.com/IEP/Students/ViewStudent?commonStudentId=11250&studentViewType=Events&programType=Hampton504");
+            Driver.Navigate().GoToUrl(_createEventUrl);
 
             AddTimeOut(10000);
 
-            var event504ReverralLinks = _createEventElements.Event504ReverralLinksFromFirstTable;
+            var event504ReverralLinks = _locationElements.Event504ReverralLinksFromFirstTable;
 
-            var eventsReverralLock = _createEventElements.Event504ReverralLinksLock.Count;
-            var event504EligibilityMeetingLinks = _createEventElements.Event504EligibilityMeetingLinks.Count;
+            var eventsReverralLock = _locationElements.Event504ReverralLinksLock;
+            var event504EligibilityMeetingLinks = _locationElements.Event504EligibilityMeetingLinks;
 
             if (event504ReverralLinks.Count != 0)
             {
                 event504ReverralLinks[0].Click();
 
-                var linkForm = _wait.Until(d => d.FindElement(By.LinkText("Section 504 Referral Form")));
+                WaitIsVisibleAndClickable(By.LinkText("Section 504 Referral Form"));
                 AddTimeOut(1000);
-                linkForm.Click();
+                _locationElements.FormLink.Click();
 
-                AddValueToFields(_wait);
-                LockEvent(_wait);
+                AddValueToFields();
+                LockEvent();
 
-                var eventsReverralLockActual = _createEventElements.Event504ReverralLinksLock.Count;
-                var event504EligibilityMeetingLinksActual = _createEventElements.Event504EligibilityMeetingLinks.Count;
+                var eventsReverralLockActual = _locationElements.Event504ReverralLinksLock;
+                var event504EligibilityMeetingLinksActual = _locationElements.Event504EligibilityMeetingLinks;
 
-                Assert.AreEqual(eventsReverralLock + 1, eventsReverralLockActual);
-                Assert.AreEqual(event504EligibilityMeetingLinks + 1, event504EligibilityMeetingLinksActual);
+                Assert.AreEqual(eventsReverralLock.Count + 1, eventsReverralLockActual.Count);
+                Assert.AreEqual(event504EligibilityMeetingLinks.Count + 1, event504EligibilityMeetingLinksActual.Count);
             }
         }
-
-        private void LockEvent(WebDriverWait wait)
+        private void WaitIsVisibleAndClickable(By location)
         {
-            wait.Until(d => d.FindElements(By.CssSelector("[required='required']")));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector("[required='required']")));
+            _wait.Until(ExpectedConditions.ElementIsVisible(location));
+            _wait.Until(ExpectedConditions.ElementToBeClickable(location));
+        }
+        private void LockEvent()
+        {
+            WaitIsVisibleAndClickable(By.CssSelector("[required='required']"));
+            WaitIsVisibleAndClickable(By.Id("btnUpdateForm"));
             AddTimeOut(3000);
-            _createEventElements.LockButton.Click();
+            _locationElements.LockButton.Click();
 
             Driver.SwitchTo().Alert().Accept();
-            AddTimeOut(10000);
+            WaitIsVisibleAndClickable(By.Id("pnlEventLockedList"));
+            AddTimeOut(2000);
         }
 
         private static void AddTimeOut(int timeOut)
@@ -131,35 +141,34 @@ namespace EventTests
             Thread.Sleep(timeOut);
         }
 
-        private void CreateEvent(WebDriverWait wait, int eventNumber)
+        private void CreateEvent(int eventNumber)
         {
-
-            wait.Until(d => d.FindElement(By.Id("btnCreateEventGroup")));
+            WaitIsVisibleAndClickable(By.Id("btnCreateEventGroup"));
             AddTimeOut(2000);
-            _createEventElements.CreateEventButton.Click();
+            _locationElements.CreateEventButton.Click();
 
-            wait.Until(d => d.FindElement(By.ClassName("k-input")));
+            WaitIsVisibleAndClickable(By.ClassName("k-input"));
             ((IJavaScriptExecutor)Driver).ExecuteScript(String.Format("$('#{0}').data('kendoDropDownList').select({1});", "EventGroupDefinitionId", eventNumber));
 
-            _createEventElements.DateControl.SendKeys("11/11/2015 12:00 AM");
-            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("btnSaveEventGroup")));
+            _locationElements.DateControl.SendKeys("11/11/2015 12:00 AM");
+            WaitIsVisibleAndClickable(By.Id("btnSaveEventGroup"));
             AddTimeOut(1000);
 
-            _createEventElements.SaveEventButton.Click();
+            _locationElements.SaveEventButton.Click();
         }
 
-        private void AddValueToFields(WebDriverWait wait)
+        private void AddValueToFields()
         {
-            wait.Until(d => d.FindElement(By.Id("btnUpdateForm")));
+            WaitIsVisibleAndClickable(By.Id("btnUpdateForm"));
             AddTimeOut(2000);
 
-            var fieldsInput = _createEventElements.FieldsInputRequired;
+            var fieldsInput = _locationElements.FieldsInputRequired;
             InputValueForFields(fieldsInput);
 
-            var fieldsTestarea = _createEventElements.FieldsTextAreaRequired;
+            var fieldsTestarea = _locationElements.FieldsTextAreaRequired;
             InputValueForFields(fieldsTestarea);
 
-            _createEventElements.UpdateFormButton.Click();
+            _locationElements.UpdateFormButton.Click();
         }
 
         private static void InputValueForFields(IList<IWebElement> fields)
@@ -171,11 +180,11 @@ namespace EventTests
             }
         }
 
-        private void GetStudent(WebDriverWait wait)
+        private void GetStudent()
         {
-            wait.Until(d => d.FindElement(By.ClassName("k-icon")));
+            WaitIsVisibleAndClickable(By.ClassName("k-icon"));
             AddTimeOut(1000);
-            var links = _createEventElements.Links;
+            var links = _locationElements.Links;
 
             for (int i = 0; i < links.Count; i++)
             {
@@ -189,10 +198,10 @@ namespace EventTests
             }
         }
 
-        private void GetEvent(WebDriverWait wait)
+        private void GetEvent()
         {
-           wait.Until(d => d.FindElement(By.Id("btnAddStudentToCaseload")));
-            var eventsLink = _createEventElements.EventLinks;
+            WaitIsVisibleAndClickable(By.Id("btnAddStudentToCaseload"));
+            var eventsLink = _locationElements.EventLinks;
 
             for (int i = 0; i < eventsLink.Count; i++)
             {
