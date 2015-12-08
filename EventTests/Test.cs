@@ -39,11 +39,11 @@ namespace EventTests
             try
             {
                 Assert.AreEqual(Driver.Url, homePageUrl);
-                Logger.Log.Info("Login successed");
+                Logger.Log.Info("Logging successed");
             }
             catch (Exception e)
             {
-                Logger.Log.Error(String.Format("Login Failed {0}", e.Message));
+                Logger.Log.Error(String.Format("Logging failed {0}", e.Message));
                 Assert.Fail();
             }
         }
@@ -59,19 +59,36 @@ namespace EventTests
             _eventService.WaitIsVisibleAndClickable(By.Id("HamptonIEPchtStudentCompliance"));
             _eventService.AddTimeOut(1000);
 
-            _locationElements.StudentsTab.Click();
+            try
+            {
+                _locationElements.StudentsTab.Click();
+            }
+            catch (Exception e)
+            {
+                Logger.Log.Error(String.Format("Сhoice student failed {0}", e.Message));
+                Assert.Fail();
+            }
 
-            _eventService.GetStudent();
+            try
+            {
+                _eventService.GetStudent();
+            }
+            catch (Exception e)
+            {
+                Logger.Log.Error(String.Format("Student did not get {0}", e.Message));
+                Assert.Fail();
+            }
+      
             _studentSummaryUrl = Driver.Url;
 
             try
             {
                 Assert.AreEqual("Accelify - Eli Aaron", Driver.Title);
-                Logger.Log.Info("Сhoice Student Successed");
+                Logger.Log.Info("Сhoice Student successed");
             }
             catch (Exception e)
             {
-                Logger.Log.Error(String.Format("Сhoice student Failed {0}", e.Message));
+                Logger.Log.Error(String.Format("Сhoice student failed {0}", e.Message));
                 Assert.Fail();
             }
         }
@@ -80,7 +97,18 @@ namespace EventTests
         public void T3_CreateEvent504ReferraL()
         {
             Driver.Navigate().GoToUrl(_studentSummaryUrl);
-            _eventService.GetEvent();
+
+            try
+            {
+                _eventService.GetEvent();
+                Logger.Log.Info("Hampton 504 open successed");
+            }
+            catch (Exception e)
+            {
+                Logger.Log.Error(String.Format("Hampton 504 did not open {0}", e.Message));
+                Assert.Fail();
+            }
+          
 
             _eventService.WaitIsVisibleAndClickable(By.Id("pnlEventLockedList"));
             _eventService.AddTimeOut(2000);
@@ -96,11 +124,11 @@ namespace EventTests
             try
             {
                 Assert.AreEqual(eventCountExpected, eventCountActual);
-                Logger.Log.Info("Create Event 504 Referral successed");
+                Logger.Log.Info("Event 504 Referral open successed");
             }
             catch (Exception e)
             {
-                Logger.Log.Error(String.Format("Create Event 504 Referral Failed {0}", e.Message));
+                Logger.Log.Error(String.Format("Event 504 Referral did not create{0}", e.Message));
                 Assert.Fail();
             }
         }
@@ -110,7 +138,7 @@ namespace EventTests
         {
             Driver.Navigate().GoToUrl(_createEventUrl);
 
-            _eventService.WaitIsVisibleAndClickable(By.Id("btnUpdateForm"));
+            _eventService.WaitIsVisibleAndClickable(By.Id("btnCreateEventGroup"));
             _eventService.AddTimeOut(2000);
 
             var event504ReverralLinks = _locationElements.Event504ReverralLinksFromFirstTable;
@@ -120,15 +148,43 @@ namespace EventTests
 
             if (event504ReverralLinks.Count != 0)
             {
-                event504ReverralLinks[0].Click();
+                try
+                {
+                    event504ReverralLinks[0].Click();
 
-                _eventService.WaitIsVisibleAndClickable(By.LinkText("Section 504 Referral Form"));
-                _eventService.AddTimeOut(1000);
-                _locationElements.FormLink.Click();
+                    _eventService.WaitIsVisibleAndClickable(By.LinkText("Section 504 Referral Form"));
+                    _eventService.AddTimeOut(1000);
+                    _locationElements.FormLink.Click();
 
-                _eventService.AddValueToFields();
-                _eventService.LockEvent();
+                    Logger.Log.Info("Section 504 Referral Form open successed");
+                }
+                catch (Exception e)
+                {
+                    Logger.Log.Error(String.Format("Section 504 Referral Form did not open {0}", e.Message));
+                    Assert.Fail();
+                }
 
+                try
+                {
+                    _eventService.AddValueToFields();
+                    Logger.Log.Info("The values to fields added successed");
+                }
+                catch (Exception e)
+                {
+                    Logger.Log.Error(String.Format("The values to fields did not add {0}", e.Message));
+                    Assert.Fail();
+                }
+
+                try
+                {
+                    _eventService.LockEvent();
+                }
+                catch (Exception e)
+                {
+                    Logger.Log.Error(String.Format("Event does not lock {0}", e.Message));
+                    Assert.Fail();
+                }
+             
                 var eventsReverralLockActual = _locationElements.Event504ReverralLinksLock;
                 var event504EligibilityMeetingLinksActual = _locationElements.Event504EligibilityMeetingLinks;
 
@@ -136,11 +192,11 @@ namespace EventTests
                 {
                     Assert.AreEqual(eventsReverralLock.Count + 1, eventsReverralLockActual.Count);
                     Assert.AreEqual(event504EligibilityMeetingLinks.Count + 1, event504EligibilityMeetingLinksActual.Count);
-                    Logger.Log.Info("Lock Event 504 Referral successed");
+                    Logger.Log.Info("Lock Event 504 Referral lock successed");
                 }
                 catch (Exception e)
                 {
-                    Logger.Log.Error(String.Format("Lock Event 504 Referral Failed {0}", e.Message));
+                    Logger.Log.Error(String.Format("Lock Event 504 Referral failed {0}", e.Message));
                     Assert.Fail();
                 }
             }
