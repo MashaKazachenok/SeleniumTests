@@ -31,7 +31,8 @@ namespace Model
         private const string LockButtonId = "btnLockEvent";
         private const string LinksCssSelector = "a[href]";
         private const string EventLinksLinkText = "Events";
-        
+        private const string UnLockButtonId = "btnUnlockEvent";
+
         [FindsBy(How = How.LinkText, Using = HomeLinkText)]
         public IWebElement HomeElement { get; set; }
 
@@ -101,7 +102,7 @@ namespace Model
             }
         }
 
-          public IList<IWebElement> Event504EligibilityMeetingLinks
+        public IList<IWebElement> Event504EligibilityMeetingLinks
         {
             get
             {
@@ -109,7 +110,27 @@ namespace Model
                     _webDriver.FindElement(By.XPath("//div[@id='pnlEventList']")).FindElements(By.LinkText("504 Eligibility Meeting"));
             }
         }
-        
+
+        [FindsBy(How = How.Id, Using = UnLockButtonId)]
+        public IWebElement UnLockButton { get; set; }
+
+        public IWebElement DeleteEligibilityEvent
+        {
+            get
+            {
+                return
+                    _webDriver.FindElement(By.XPath("//div[@id='pnlEventList']//table//tr//td[contains(text(),'Eligibility Meeting')]/following-sibling::td[7]"));
+            }
+        }
+
+        public IWebElement DeleteEvent504Referral
+        {
+            get
+            {
+                return
+                    _webDriver.FindElement(By.XPath("//div[@id='pnlEventList']//table//tr//td[contains(text(),'504 Referral')]/following-sibling::td[7]"));
+            }
+        }
 
     }
 }

@@ -106,12 +106,12 @@ namespace EventTests
         {
             WaitIsVisibleAndClickable(By.CssSelector("[required='required']"));
             WaitIsVisibleAndClickable(By.Id("btnUpdateForm"));
-            AddTimeOut(3000);
+            AddTimeOut(4000);
             _locationElements.LockButton.Click();
 
             Driver.SwitchTo().Alert().Accept();
-            WaitIsVisibleAndClickable(By.Id("pnlEventLockedList"));
-            AddTimeOut(2000);
+            WaitIsVisibleAndClickable(By.Id("btnCreateEventGroup"));
+            AddTimeOut(3000);
         }
     }
 }
