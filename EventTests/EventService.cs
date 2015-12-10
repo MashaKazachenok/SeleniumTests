@@ -12,7 +12,7 @@ namespace EventTests
     {
         private static readonly FirefoxDriver Driver = new FirefoxDriver();
         private readonly LocationElements _locationElements = new LocationElements(Driver);
-        private readonly WebDriverWait _wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
+        private readonly WebDriverWait _wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(30));
 
          public static FirefoxDriver GetDriver()
          {

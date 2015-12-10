@@ -43,7 +43,7 @@ namespace EventTests
             }
             catch (Exception e)
             {
-                Logger.Log.Error(String.Format("Logging failed {0}", e.Message));
+                Logger.Log.Error(String.Format("Logging failed: {0}", e.Message));
                 Assert.Fail();
             }
         }
@@ -65,7 +65,7 @@ namespace EventTests
             }
             catch (Exception e)
             {
-                Logger.Log.Error(String.Format("Сhoice student failed {0}", e.Message));
+                Logger.Log.Error(String.Format("Сhoice student failed: {0}", e.Message));
                 Assert.Fail();
             }
 
@@ -75,7 +75,7 @@ namespace EventTests
             }
             catch (Exception e)
             {
-                Logger.Log.Error(String.Format("Student did not get {0}", e.Message));
+                Logger.Log.Error(String.Format("Student did not get: {0}", e.Message));
                 Assert.Fail();
             }
 
@@ -88,7 +88,7 @@ namespace EventTests
             }
             catch (Exception e)
             {
-                Logger.Log.Error(String.Format("Сhoice student failed {0}", e.Message));
+                Logger.Log.Error(String.Format("Сhoice student failed: {0}", e.Message));
                 Assert.Fail();
             }
         }
@@ -101,11 +101,11 @@ namespace EventTests
             try
             {
                 _eventService.GetEvent();
-                Logger.Log.Info("Hampton 504 open successed");
+                Logger.Log.Info("Hampton 504 open successfully");
             }
             catch (Exception e)
             {
-                Logger.Log.Error(String.Format("Hampton 504 did not open {0}", e.Message));
+                Logger.Log.Error(String.Format("Hampton 504 did not open: {0}", e.Message));
                 Assert.Fail();
             }
 
@@ -124,11 +124,11 @@ namespace EventTests
             try
             {
                 Assert.AreEqual(eventCountExpected, eventCountActual);
-                Logger.Log.Info("Event 504 Referral open successed");
+                Logger.Log.Info("Event 504 Referral open successfully");
             }
             catch (Exception e)
             {
-                Logger.Log.Error(String.Format("Event 504 Referral did not create{0}", e.Message));
+                Logger.Log.Error(String.Format("Event 504 Referral did not create: {0}", e.Message));
                 Assert.Fail();
             }
         }
@@ -136,7 +136,11 @@ namespace EventTests
         [TestMethod]
         public void T4_LockEvent504Reverral()
         {
-            Driver.Navigate().GoToUrl(_createEventUrl);
+
+            if (Driver.Url != _createEventUrl)
+            {
+                Driver.Navigate().GoToUrl(_createEventUrl);
+            }
 
             _eventService.WaitIsVisibleAndClickable(By.Id("btnCreateEventGroup"));
             _eventService.AddTimeOut(2000);
@@ -160,18 +164,18 @@ namespace EventTests
                 }
                 catch (Exception e)
                 {
-                    Logger.Log.Error(String.Format("Section 504 Referral Form did not open {0}", e.Message));
+                    Logger.Log.Error(String.Format("Section 504 Referral Form didn't open: {0}", e.Message));
                     Assert.Fail();
                 }
 
                 try
                 {
                     _eventService.AddValueToFields();
-                    Logger.Log.Info("The values to fields added successed");
+                    Logger.Log.Info("The values to fields added successfully");
                 }
                 catch (Exception e)
                 {
-                    Logger.Log.Error(String.Format("The values to fields did not add {0}", e.Message));
+                    Logger.Log.Error(String.Format("The values to fields didn't add: {0}", e.Message));
                     Assert.Fail();
                 }
 
@@ -181,7 +185,7 @@ namespace EventTests
                 }
                 catch (Exception e)
                 {
-                    Logger.Log.Error(String.Format("Event does not lock {0}", e.Message));
+                    Logger.Log.Error(String.Format("Event didn't lock: {0}", e.Message));
                     Assert.Fail();
                 }
 
@@ -192,11 +196,11 @@ namespace EventTests
                 {
                     Assert.AreEqual(eventsReverralLock.Count + 1, eventsReverralLockActual.Count);
                     Assert.AreEqual(event504EligibilityMeetingLinks.Count + 1, event504EligibilityMeetingLinksActual.Count);
-                    Logger.Log.Info("Lock Event 504 Referral lock successed");
+                    Logger.Log.Info("Lock Event 504 Referral successed");
                 }
                 catch (Exception e)
                 {
-                    Logger.Log.Error(String.Format("Lock Event 504 Referral failed {0}", e.Message));
+                    Logger.Log.Error(String.Format("Lock Event 504 Referral failed: {0}", e.Message));
                     Assert.Fail();
                 }
             }
@@ -209,7 +213,10 @@ namespace EventTests
         [TestMethod]
         public void T5_UnLockEvent504Reverral()
         {
-            Driver.Navigate().GoToUrl(_createEventUrl);
+            if (Driver.Url != _createEventUrl)
+            {
+                Driver.Navigate().GoToUrl(_createEventUrl);
+            }
 
             _eventService.WaitIsVisibleAndClickable(By.Id("btnCreateEventGroup"));
             _eventService.AddTimeOut(2000);
@@ -234,11 +241,11 @@ namespace EventTests
                 try
                 {
                     Assert.AreEqual(eventsReverralLock.Count - 1, eventsReverralLockActual.Count);
-                    Logger.Log.Info("Lock Event 504 Referral unlock successed");
+                    Logger.Log.Info("Unlock Event 504 Referral  successed");
                 }
                 catch (Exception e)
                 {
-                    Logger.Log.Error(String.Format("UnLock Event 504 Referral failed {0}", e.Message));
+                    Logger.Log.Error(String.Format("UnLock Event 504 Referral failed: {0}", e.Message));
                     Assert.Fail();
                 }
             }
@@ -251,7 +258,10 @@ namespace EventTests
         [TestMethod]
         public void T6_DeleteEvent504Reverral()
         {
-            Driver.Navigate().GoToUrl(_createEventUrl);
+            if (Driver.Url != _createEventUrl)
+            {
+                Driver.Navigate().GoToUrl(_createEventUrl);
+            }
 
             _eventService.WaitIsVisibleAndClickable(By.Id("btnCreateEventGroup"));
             _eventService.AddTimeOut(3000);
@@ -265,18 +275,18 @@ namespace EventTests
 
 
                 _eventService.WaitIsVisibleAndClickable(By.Id("btnCreateEventGroup"));
-                _eventService.AddTimeOut(2000);
+                _eventService.AddTimeOut(3000);
 
                 var event504ReverralLinksActual = _locationElements.Event504ReverralLinksFromFirstTable;
 
                 try
                 {
                     Assert.AreEqual(event504ReverralLinks.Count - 1, event504ReverralLinksActual.Count);
-                    Logger.Log.Info("Delete Event 504 Referral successed");
+                    Logger.Log.Info("Remove Event 504 Referral successed");
                 }
                 catch (Exception e)
                 {
-                    Logger.Log.Error(String.Format("Delete Event 504 Referral failed {0}", e.Message));
+                    Logger.Log.Error(String.Format("Remove Event 504 Referral failed: {0}", e.Message));
                     Assert.Fail();
                 }
             }
@@ -289,7 +299,10 @@ namespace EventTests
         [TestMethod]
         public void T7_DeleteNoticeAndEligibilityMeeting()
         {
-            Driver.Navigate().GoToUrl(_createEventUrl);
+            if (Driver.Url != _createEventUrl)
+            {
+                Driver.Navigate().GoToUrl(_createEventUrl);
+            }
 
             _eventService.WaitIsVisibleAndClickable(By.Id("btnCreateEventGroup"));
             _eventService.AddTimeOut(2000);
@@ -315,11 +328,11 @@ namespace EventTests
                 try
                 {
                     Assert.AreEqual(event504EligibilityMeetingLinks.Count - 1, event504EligibilityMeetingLinksActual.Count);
-                    Logger.Log.Info("Delete Event 504 Eligibility successed");
+                    Logger.Log.Info("Remove Event 504 Eligibility successed");
                 }
                 catch (Exception e)
                 {
-                    Logger.Log.Error(String.Format("Delete Event 504 Eligibility failed {0}", e.Message));
+                    Logger.Log.Error(String.Format("Remove Event 504 Eligibility failed: {0}", e.Message));
                     Assert.Fail();
                 }
             }
